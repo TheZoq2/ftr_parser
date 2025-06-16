@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{Cursor, Read, Seek, SeekFrom};
 
-use color_eyre::eyre::bail;
+use eyre::bail;
 use lz4_flex::decompress_into;
 use num_bigint::{BigInt, BigUint};
 
@@ -49,14 +49,14 @@ impl <'a> FtrParser<'a>{
         Self {ftr}
     }
 
-    pub(super) fn load<R: Read + Seek>(&mut self, file: R) -> color_eyre::Result<()> {
+    pub(super) fn load<R: Read + Seek>(&mut self, file: R) -> eyre::Result<()> {
         let cbor_decoder = CborDecoder::new(file);
         Self::parse_input(self, cbor_decoder)?;
         Ok(())
     }
 
     //TODO change to work with buffered readers
-    fn parse_input<R: Read + Seek>(&mut self, mut cbor_decoder: CborDecoder<R>) -> color_eyre::Result<()>{
+    fn parse_input<R: Read + Seek>(&mut self, mut cbor_decoder: CborDecoder<R>) -> eyre::Result<()>{
         let tag = cbor_decoder.read_tag()?;
         if tag != 55799 {
             bail!("Not a valid FTR file");
@@ -200,7 +200,7 @@ impl <'a> FtrParser<'a>{
         Ok(())
     }
 
-    fn parse_dict<R: Read + Seek>(&mut self, cbd: &mut CborDecoder<R>) -> color_eyre::Result<()>{
+    fn parse_dict<R: Read + Seek>(&mut self, cbd: &mut CborDecoder<R>) -> eyre::Result<()>{
         let size = cbd.read_map_length()?;
 
         for _i in 0..size {
@@ -211,7 +211,7 @@ impl <'a> FtrParser<'a>{
         Ok(())
     }
 
-    fn parse_dir<R: Read + Seek>(&mut self, cbd: &mut CborDecoder<R>) -> color_eyre::Result<()>{
+    fn parse_dir<R: Read + Seek>(&mut self, cbd: &mut CborDecoder<R>) -> eyre::Result<()>{
         let size = cbd.read_array_length()?;
         if size < 0 {
             let mut next_dir = cbd.peek();
@@ -229,7 +229,7 @@ impl <'a> FtrParser<'a>{
     }
 
 
-    fn parse_dir_entry<R: Read + Seek>(&mut self, cbd: &mut CborDecoder<R>) -> color_eyre::Result<()>{
+    fn parse_dir_entry<R: Read + Seek>(&mut self, cbd: &mut CborDecoder<R>) -> eyre::Result<()>{
         let dir_tag = cbd.read_tag()?;
         if dir_tag == STREAM as i64{
             let len = cbd.read_array_length()?;
@@ -282,7 +282,7 @@ impl <'a> FtrParser<'a>{
         Ok(())
     }
 
-    fn parse_tx_block<R: Read + Seek>(&mut self, cbd: &mut CborDecoder<R>) -> color_eyre::Result<()>{
+    fn parse_tx_block<R: Read + Seek>(&mut self, cbd: &mut CborDecoder<R>) -> eyre::Result<()>{
         let size = cbd.read_array_length()?;
         if size != -1 {
             bail!("Transaction Block does not have indefinite length!");
@@ -369,7 +369,7 @@ impl <'a> FtrParser<'a>{
         Ok(())
     }
 
-    fn parse_rel<R: Read + Seek>(&mut self, cbd: &mut CborDecoder<R>) -> color_eyre::Result<()>{
+    fn parse_rel<R: Read + Seek>(&mut self, cbd: &mut CborDecoder<R>) -> eyre::Result<()>{
         let size = cbd.read_array_length()?;
         if size != -1 {
             bail!("Relation block does not have indefinite size!");
@@ -437,7 +437,7 @@ impl <'a> FtrParser<'a>{
     }
 
     //loads the transactions of all generators of stream 'stream_id'
-    pub(super) fn load_transactions(&mut self, stream_id: usize) -> color_eyre::Result<()>{
+    pub(super) fn load_transactions(&mut self, stream_id: usize) -> eyre::Result<()>{
         if self.ftr.path.is_none() {
             bail!("Cannot load transaction when then input is not a file! \nTransactions should already be loaded.")
         }
@@ -470,7 +470,7 @@ impl <'a> FtrParser<'a>{
         Ok(())
     }
 
-    fn parse_attribute<R: Read + Seek>(&self, cbd: &mut CborDecoder<R>, attribute_type: u64) -> color_eyre::Result<Attribute> {
+    fn parse_attribute<R: Read + Seek>(&self, cbd: &mut CborDecoder<R>, attribute_type: u64) -> eyre::Result<Attribute> {
         let name_id = cbd.read_int()? as usize;
         let data_type = cbd.read_int()?;
         let data_type_with_value = match data_type as u8 {

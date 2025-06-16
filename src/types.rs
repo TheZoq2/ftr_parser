@@ -215,7 +215,7 @@ pub struct FTR {
 
 impl FTR {
     // Takes a stream id and loads all associated transactions into memory
-    pub fn load_stream_into_memory(&mut self, stream_id: usize) -> color_eyre::Result<()>{
+    pub fn load_stream_into_memory(&mut self, stream_id: usize) -> eyre::Result<()>{
         let mut ftr_parser = FtrParser::new(self);
 
         ftr_parser.load_transactions(stream_id)?;

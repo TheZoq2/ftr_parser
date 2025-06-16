@@ -12,7 +12,7 @@ use crate::types::{FTR, Timescale};
 /// The function you probably want to call first.
 /// Parses the file with the given name and returns a FTR variable with all streams, generators and relations already accessible.
 /// However, it does not yet load the transactions themselves into memory. This can be done with 'load_stream_into_memory()'.
-pub fn parse_ftr(file_name: PathBuf) -> color_eyre::Result<FTR>{
+pub fn parse_ftr(file_name: PathBuf) -> eyre::Result<FTR>{
 
     let mut ftr = FTR{
         time_scale: Timescale::None,
@@ -32,7 +32,7 @@ pub fn parse_ftr(file_name: PathBuf) -> color_eyre::Result<FTR>{
     Ok(ftr)
 }
 
-pub fn read_from_bytes(bytes: Vec<u8>) -> color_eyre::Result<FTR>{
+pub fn read_from_bytes(bytes: Vec<u8>) -> eyre::Result<FTR>{
 
     let mut ftr = FTR{
         time_scale: Timescale::None,
